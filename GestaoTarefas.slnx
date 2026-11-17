@@ -1,0 +1,12 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/GestaoTarefas.Api/GestaoTarefas.Api.csproj" />
+    <Project Path="src/GestaoTarefas.Application/GestaoTarefas.Application.csproj" />
+    <Project Path="src/GestaoTarefas.Domain/GestaoTarefas.Domain.csproj" />
+    <Project Path="src/GestaoTarefas.Infrastructure/GestaoTarefas.Infrastructure.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/GestaoTarefas.IntegrationTests/GestaoTarefas.IntegrationTests.csproj" />
+    <Project Path="tests/GestaoTarefas.UnitTests/GestaoTarefas.UnitTests.csproj" />
+  </Folder>
+</Solution>
