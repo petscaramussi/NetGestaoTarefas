@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace GestaoTarefas.Api.ExceptionHandling;
 
 /// <summary>
-/// Substitui as mensagens padrão (em inglês) de erros de model binding/JSON por mensagens em português.
+/// Padroniza a resposta 400 de erros de model binding/JSON, com mensagens em português.
 /// </summary>
 public static class InvalidModelStateResponse
 {

@@ -2,15 +2,6 @@
 
 API RESTful para gestão de tarefas (criar, listar com filtros, editar e excluir), desenvolvida em **.NET 10 (LTS)** com **Entity Framework Core InMemory**, documentada com **Swagger** e coberta por testes **xUnit**.
 
-## Sumário
-
-- [Tecnologias](#tecnologias)
-- [Como executar](#como-executar)
-- [Como testar](#como-testar)
-- [Endpoints](#endpoints)
-- [Arquitetura](#arquitetura)
-- [Decisões técnicas](#decisões-técnicas)
-
 ## Tecnologias
 
 | Item | Uso |
@@ -27,7 +18,7 @@ API RESTful para gestão de tarefas (criar, listar com filtros, editar e excluir
 Pré-requisito: [.NET SDK 10](https://dotnet.microsoft.com/download).
 
 ```bash
-git clone <url-do-repositorio>
+git clone https://github.com/petscaramussi/NetGestaoTarefas.git
 cd NetGestaoTarefas
 dotnet run --project src/GestaoTarefas.Api
 ```
@@ -151,22 +142,23 @@ tests/
 | **Infrastructure** | Detalhes de persistência. Implementa `ITaskRepository` com EF Core InMemory. |
 | **Api** | Camada HTTP: recebe DTOs, delega ao serviço e traduz resultados/exceções em códigos HTTP. |
 
-**Por que este modelo?** Ele separa claramente as responsabilidades pedidas no desafio (controlador, serviço, repositório), mantém as regras de negócio independentes de framework/banco e torna o código facilmente testável. Trocar o InMemory por SQL Server, por exemplo, exige mudanças apenas na Infrastructure. Para o tamanho do problema, evitou-se complexidade extra (CQRS, MediatR, Unit of Work), mantendo a solução simples.
+**Por que esse modelo?** Separa as responsabilidades pedidas no desafio (controlador, serviço, repositório), deixa as regras de negócio independentes de framework/banco e facilita os testes. Trocar o InMemory por SQL Server, por exemplo, mexe só na Infrastructure. Não usei CQRS, MediatR ou Unit of Work porque, para o tamanho do problema, só adicionariam complexidade.
 
-### SOLID na prática
+### SOLID
 
-- **S** – Cada classe tem uma responsabilidade: controller (HTTP), serviço (regras), validadores (entrada), repositório (persistência), `GlobalExceptionHandler` (erros).
-- **O** – Novas regras de validação ou tratamentos de erro são adicionados sem alterar o serviço/controller.
-- **L** – Qualquer implementação de `ITaskRepository`/`ITaskService` pode substituir a atual (ex.: mocks nos testes).
-- **I** – Interfaces pequenas e específicas (`ITaskService`, `ITaskRepository`).
-- **D** – Controller e serviço dependem de abstrações, resolvidas via injeção de dependência. Até o relógio é injetado (`TimeProvider`), tornando as regras de data testáveis.
+- **S**: cada classe tem uma responsabilidade: controller (HTTP), serviço (regras), validadores (entrada), repositório (persistência), `GlobalExceptionHandler` (erros).
+- **O**: novas regras de validação ou tratamentos de erro entram sem alterar o serviço/controller.
+- **L**: qualquer implementação de `ITaskRepository`/`ITaskService` pode substituir a atual (ex.: mocks nos testes).
+- **I**: interfaces pequenas e específicas (`ITaskService`, `ITaskRepository`).
+- **D**: controller e serviço dependem de abstrações, resolvidas por injeção de dependência. O relógio também é injetado (`TimeProvider`), o que permite testar as regras de data.
 
 ## Decisões técnicas
 
 - **DTOs** separam o contrato da API da entidade de domínio (`CreateTaskRequest`, `UpdateTaskRequest`, `TaskFilter`, `TaskResponse`).
-- **Validação** com FluentValidation executada na camada de aplicação, garantindo as regras independentemente de quem chama o serviço. Erros de formato no JSON (ex.: status inexistente) são rejeitados pelo próprio ASP.NET Core com 400.
+- **Validação** com FluentValidation na camada de aplicação, então as regras valem independentemente de quem chama o serviço. Erros de formato (JSON inválido, status inexistente, data fora do padrão) também retornam 400 com mensagem em português.
 - **Tratamento de erros** centralizado via `IExceptionHandler`: `ValidationException` → 400, `NotFoundException` → 404, demais → 500 (sem expor detalhes internos).
 - **Logging** com `ILogger` nativo: criação/edição/exclusão em nível `Information`, recursos não encontrados em `Warning` e falhas inesperadas em `Error`.
-- **Status como string** no JSON (`JsonStringEnumConverter`) para uma API mais legível.
-- **Swagger** enriquecido com comentários XML (resumos, exemplos e códigos de resposta), habilitado no ambiente de desenvolvimento.
+- **Status como string** no JSON (`JsonStringEnumConverter`), mais legível que números.
+- **Datas** no formato `dd-MM-yyyy`, com conversores JSON e model binder próprios.
+- **Swagger** com comentários XML (resumos, exemplos e códigos de resposta), habilitado no ambiente de desenvolvimento.
 - **Código único** da tarefa é um `Guid`, gerado no domínio.

@@ -1,5 +1,6 @@
 using System.Net;
 using System.Net.Http.Json;
+using System.Text.Json;
 using GestaoTarefas.Application.DTOs;
 using GestaoTarefas.Domain.Enums;
 using Microsoft.AspNetCore.Mvc;
@@ -114,7 +115,7 @@ public class TasksEndpointsTests : IClassFixture<ApiFactory>
     {
         var response = await _client.PostAsJsonAsync(BaseUrl, new { title = "Formato", dueDate = "31-12-2099" });
 
-        var json = await response.Content.ReadFromJsonAsync<System.Text.Json.JsonElement>();
+        var json = await response.Content.ReadFromJsonAsync<JsonElement>();
         Assert.Equal("31-12-2099", json.GetProperty("dueDate").GetString());
         Assert.Matches(@"^\d{2}-\d{2}-\d{4} \d{2}:\d{2}:\d{2}$", json.GetProperty("createdAt").GetString());
     }
